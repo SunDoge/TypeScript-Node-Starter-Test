@@ -1,0 +1,17 @@
+{
+  "name": "larakoa",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "SunDoge",
+  "license": "MIT",
+  "dependencies": {
+    "injection-js": "^2.2.1",
+    "koa": "^2.5.0",
+    "koa-router": "^7.4.0",
+    "mitol": "0.0.10"
+  }
+}
