@@ -10,10 +10,17 @@ module.exports = class Config {
     constructor(app) {
         this.app = app;
 
-        const configs = fs.readdirSync(path.join(this.app.baseDir, 'config'));
+        const configFiles = fs.readdirSync(path.join(this.app.baseDir, 'config'));
 
-        for (let config of configs) {
-            this[config.split('.')[0]] = require(path.join(this.app.baseDir, 'config', config));
+        for (let configFile of configFiles) {
+            let config = require(path.join(this.app.baseDir, 'config', configFile));
+
+            if (typeof config === 'function') {
+                config = config(this.app);
+            }
+            // console.log(config);
+            // this[config.split('.')[0]] = require(path.join(this.app.baseDir, 'config', config))(this.app);
+            this[configFile.split('.')[0]] = config;
         }
     }
 }
