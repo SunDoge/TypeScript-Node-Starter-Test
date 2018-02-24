@@ -8,55 +8,77 @@ const passport = require('koa-passport')
 const flash = require('../app/http/middleware/koa-flash');
 const error = require('koa-error');
 const dotenv = require('dotenv');
+const mongoose = require('mongoose');
 
 dotenv.config({ path: ".env.example" });
 
 const app = new Application();
 
-app.register([
-    {
-        provide: 'views', useFactory: function () {
-            return views(app.baseDir + '/views', app.config.view)
-        }
-    },
-    {
-        provide: 'static', useFactory: function () {
-            return serve(app.baseDir + '/public');
-        }
-    },
-    {
-        provide: 'bodyParser', useFactory: function () {
-            return bodyParser();
-        }
-    },
-    {
-        provide: 'session', useFactory: function () {
-            return session({}, app)
-        }
-    },
-    {
-        provide: 'flash', useFactory: function () {
-            return flash();
-        }
-    },
-    {
-        provide: 'error', useFactory: function () {
-            return error({
-                engine: 'pug',
-                template: app.baseDir + '/views/error.pug'
-            });
-        }
-    }
-]);
+mongoose.connect(process.env.MONGODB_URI || process.env.MONGOLAB_URI);
+
+mongoose.connection.on("error", () => {
+    console.log("MongoDB connection error. Please make sure MongoDB is running.");
+    process.exit();
+});
+
+// app.register([
+//     {
+//         provide: 'views', useFactory: function (config) {
+//             return views(app.baseDir + '/views', config.view)
+//         }, deps: ['config']
+//     },
+//     {
+//         provide: 'static', useFactory: function () {
+//             return serve(app.baseDir + '/public');
+//         }
+//     },
+//     {
+//         provide: 'bodyParser', useFactory: function () {
+//             return bodyParser();
+//         }
+//     },
+//     {
+//         provide: 'session', useFactory: function () {
+//             return session({}, app)
+//         }
+//     },
+//     {
+//         provide: 'flash', useFactory: function () {
+//             return flash();
+//         }
+//     },
+//     {
+//         provide: 'error', useFactory: function () {
+//             return error({
+//                 engine: 'pug',
+//                 template: app.baseDir + '/views/error.pug'
+//             });
+//         }
+//     }
+// ]);
 
 app.keys = ['secret'];
 
-app.use(app.make('static'));
-app.use(app.make('bodyParser'));
-app.use(app.make('session'));
-app.use(app.make('views'))
-app.use(app.make('flash'));
-app.use(app.make('error'));
+app.useMiddleware([
+    (app) => { return serve(path.join(app.baseDir, 'public')); },
+    (app) => { return bodyParser(); },
+    (app) => { return session({}, app); },
+    (app) => { return views(path.join(app.baseDir, 'views'), app.config.view); },
+    (app) => { return flash(); },
+    (app) => {
+        return error({
+            engine: 'pug',
+            template: path.join(app.baseDir, '/views/error.pug')
+        })
+    },
+])
+
+// app.use(app.make('static'));
+// app.use(app.make('bodyParser'));
+// app.use(app.make('session'));
+// app.use(app.make('views'))
+// app.use(app.make('flash'));
+// app.use(app.make('error'));
 
 app.use(passport.initialize());
 app.use(passport.session());

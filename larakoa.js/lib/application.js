@@ -83,13 +83,19 @@ module.exports = class Application extends KoaApplication {
         this.use(this.router.allowedMethods());
     }
 
+    useMiddleware(middleware) {
+        middleware.forEach((value) => {
+            this.use(value(this))
+        });
+    }
+
     routeMiddleware(middleware) {
         if (!middleware instanceof Array) {
             middleware = [middleware];
         }
 
         middleware.forEach((value, index) => {
-            this.register({ provide: index, useFactory: value });
+            this.register({ provide: index, useFactory: value, deps: ['app'] });
         });
     }
 

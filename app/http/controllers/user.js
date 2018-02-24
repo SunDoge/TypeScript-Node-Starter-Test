@@ -69,8 +69,26 @@ module.exports = class UserController extends Controller {
 
     async postSignup() {
         const user = new User({
-            email: req.body.email,
-            password: req.body.password
+            email: this.ctx.params.email,
+            password: this.ctx.params.password
+        });
+
+        User.findOne({ email: this.ctx.params.email }, (err, existingUser) => {
+            if (err) { return next(err); }
+            if (existingUser) {
+                this.ctx.flash("errors", { msg: "Account with that email address already exists." });
+                return this.ctx.redirect("/signup");
+            }
+            user.save((err) => {
+                if (err) { return next(err); }
+                this.ctx.logIn(user, (err) => {
+                    if (err) {
+                        // return next(err);
+                        throw err;
+                    }
+                    this.ctx.redirect("/");
+                });
+            });
         });
     }
 
