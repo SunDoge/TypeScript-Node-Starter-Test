@@ -73,14 +73,28 @@ module.exports = class UserController extends Controller {
             password: this.ctx.params.password
         });
 
+        // console.log(user);
+
         User.findOne({ email: this.ctx.params.email }, (err, existingUser) => {
-            if (err) { return next(err); }
+            // if (err) { return next(err); }
+            if (err) {
+                throw err;
+            }
+
             if (existingUser) {
                 this.ctx.flash("errors", { msg: "Account with that email address already exists." });
-                return this.ctx.redirect("/signup");
+                // return this.ctx.redirect("/signup");
+                this.ctx.redirect("/");
+                // return;
             }
+
+            
+            
             user.save((err) => {
-                if (err) { return next(err); }
+                // if (err) { return next(err); }
+                if (err) {
+                    throw err;
+                }
                 this.ctx.logIn(user, (err) => {
                     if (err) {
                         // return next(err);
