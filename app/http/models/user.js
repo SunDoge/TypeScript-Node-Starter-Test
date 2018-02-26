@@ -38,6 +38,12 @@ userSchema.pre("save", function save(next) {
     });
 });
 
+userSchema.methods.comparePassword = function (candidatePassword, cb) {
+    bcrypt.compare(candidatePassword, this.password, (err, isMatch) => {
+        cb(err, isMatch);
+    });
+};
+
 userSchema.methods.gravatar = function (size) {
     if (!size) {
         size = 200;

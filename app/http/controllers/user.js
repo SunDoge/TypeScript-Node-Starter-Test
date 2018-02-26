@@ -5,27 +5,26 @@ const User = require('../models/user');
 module.exports = class UserController extends Controller {
     async getLogin() {
         if (this.ctx.user) {
-            this.ctx.redirect('/');
+            return this.ctx.redirect('/');
         }
-
-        await this.ctx.render('account/login', { title: "Login", messages: {} });
+        await this.ctx.render('account/login', { title: "Login" });
     }
 
     async postLogin() {
         // this.ctx.assert("email", "Email is not valid").isEmail();
         // this.ctx.assert("password", "Password cannot be blank").notEmpty();
 
-        passport.authenticate('local', (err, user, info) => {
+        await passport.authenticate('local', (err, user, info) => {
             if (err) { throw err; }
             if (!user) {
-                this.ctx.flash("errors", info.message);
+                this.ctx.flash("errors", { msg: info.message });
                 return this.ctx.redirect("/login");
             }
 
             this.ctx.logIn(user, (err) => {
                 if (err) { throw err };
                 this.ctx.flash("success", { msg: "Success! You are logged in." });
-                this.ctx.redirect(req.session.returnTo || "/");
+                this.ctx.redirect(this.ctx.session.returnTo || "/");
             });
         })(this.ctx);
     }
@@ -68,37 +67,36 @@ module.exports = class UserController extends Controller {
     }
 
     async postSignup() {
+        // console.log(this.ctx.request.body);
         const user = new User({
-            email: this.ctx.params.email,
-            password: this.ctx.params.password
+            email: this.ctx.request.body.email,
+            password: this.ctx.request.body.password
         });
 
-        // console.log(user);
-
-        User.findOne({ email: this.ctx.params.email }, (err, existingUser) => {
+        await User.findOne({ email: this.ctx.request.body.email }, (err, existingUser) => {
             // if (err) { return next(err); }
             if (err) {
-                throw err;
+                console.log(err);
             }
 
             if (existingUser) {
                 this.ctx.flash("errors", { msg: "Account with that email address already exists." });
-                // return this.ctx.redirect("/signup");
-                this.ctx.redirect("/");
-                // return;
+                return this.ctx.redirect("/signup");
             }
 
-            
-            
+
+
             user.save((err) => {
                 // if (err) { return next(err); }
                 if (err) {
-                    throw err;
+                    // throw err;
+                    console.log(err);
                 }
                 this.ctx.logIn(user, (err) => {
                     if (err) {
                         // return next(err);
-                        throw err;
+                        // throw err;
+                        console.log(err);
                     }
                     this.ctx.redirect("/");
                 });
