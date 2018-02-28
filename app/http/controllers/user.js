@@ -34,28 +34,6 @@ module.exports = class UserController extends Controller {
         this.ctx.redirect('/');
     }
 
-    async getForgot() {
-        if (this.ctx.isAuthenticated()) {
-            return this.ctx.redirect('/');
-        }
-
-        await this.ctx.render("account/forgot", {
-            title: "Forgot Password", messages: {}
-        });
-    }
-
-    async postForgot() {
-
-    }
-
-    async getReset() {
-
-    }
-
-    async postReset() {
-
-    }
-
     async getSignup() {
         if (this.ctx.user) {
             return this.ctx.redirect('/');
@@ -109,4 +87,32 @@ module.exports = class UserController extends Controller {
             title: "Account Management"
         });
     }
+
+    async postUpdateProfile() {
+        
+    }
+
+    async getForgot() {
+        if (this.ctx.isAuthenticated()) {
+            return this.ctx.redirect('/');
+        }
+
+        await this.ctx.render("account/forgot", {
+            title: "Forgot Password", messages: {}
+        });
+    }
+
+    async postForgot() {
+
+    }
+
+    async getReset() {
+
+    }
+
+    async postReset() {
+
+    }
+
+
 }

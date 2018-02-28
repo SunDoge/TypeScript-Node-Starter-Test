@@ -1,6 +1,7 @@
 const { Inject } = require('injection-js');
 const Application = require('../application');
 const BaseRouter = require('koa-router');
+const container = require('../container/container');
 
 module.exports = class Router {
 
@@ -256,7 +257,7 @@ module.exports = class Router {
 
             for (let m of route.action.middleware) {
                 if (typeof m == 'string') {
-                    middleware.push(this.app.make(m))
+                    middleware.push(container.get(m))
                 } else {
                     middleware.push(m);
                 }
@@ -275,7 +276,7 @@ module.exports = class Router {
 
             // Should controller be newed per request? I'll leave it here.
             // this.app.controllers.set(callable[0], new controller);
-            this.app.register({ provide: callable[0], useClass: Controller });
+            container.register({ provide: callable[0], useClass: Controller });
 
             // console.log(this.app.controllers);
 
@@ -284,7 +285,7 @@ module.exports = class Router {
                 // console.log(methodName)
                 // console.log(((ctx.app as Application).controllers.get(callable[0])!.setContext(ctx) as any)[methodName])
                 // await ctx.app.controllers.get(callable[0]).setContext(ctx)[methodName]();
-                await ctx.app.make(callable[0]).setContext(ctx)[methodName]();
+                await ctx.app.container.get(callable[0]).setContext(ctx)[methodName]();
             });
 
         } else if (route.action.fn) {

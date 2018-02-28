@@ -5,6 +5,7 @@ const BaseRouter = require('koa-router');
 const mitol = require('mitol');
 const debug = require('debug')('koa:application');
 const Config = require('./config/config');
+const container = require('./container/container');
 
 
 module.exports = class Application extends KoaApplication {
@@ -17,8 +18,8 @@ module.exports = class Application extends KoaApplication {
         super();
 
         this.options = options;
-        this.providers = [];
-        this.resolved = false;
+        // this.providers = [];
+        // this.resolved = false;
         // this.controllers = new Map();
         // Final works
         this.bootstrapContainer();
@@ -28,14 +29,15 @@ module.exports = class Application extends KoaApplication {
     }
 
     bootstrapContainer() {
-        this.register({ provide: 'app', useValue: this });
+        this.container = container;
+        this.container.register([{ provide: 'app', useValue: this }]);
         // this.register({ provide: ThisApplication, useValue: this });
         this.registerContainerAliases();
     }
 
     registerContainerAliases() {
         // test router
-        this.register([
+        this.container.register([
             { provide: 'baseRouter', useFactory: function () { return new BaseRouter(); } },
             { provide: 'router', useClass: Router },
             { provide: 'config', useClass: Config },
@@ -46,37 +48,37 @@ module.exports = class Application extends KoaApplication {
     //     this.router = this.make('router');
     // }
     get router() {
-        return this.make('router');
+        return this.container.get('router');
     }
 
     get config() {
-        return this.make('config');
+        return this.container.get('config');
     }
 
-    register(provider) {
-        if (provider instanceof Array) {
-            this.providers = this.providers.concat(provider);
-        } else {
-            this.providers.push(provider);
-        }
+    // register(provider) {
+    //     if (provider instanceof Array) {
+    //         this.providers = this.providers.concat(provider);
+    //     } else {
+    //         this.providers.push(provider);
+    //     }
 
-        // this.resolveAndCreate();
-        this.resolved = false;
-    }
+    //     // this.resolveAndCreate();
+    //     this.resolved = false;
+    // }
 
-    resolveAndCreate() {
-        this.injector = ReflectiveInjector.resolveAndCreate(this.providers);
-        this.resolved = true;
-    }
+    // resolveAndCreate() {
+    //     this.injector = ReflectiveInjector.resolveAndCreate(this.providers);
+    //     this.resolved = true;
+    // }
 
-    make(token, notFoundValue) {
+    // make(token, notFoundValue) {
 
-        if (!this.resolved) {
-            this.resolveAndCreate();
-        }
+    //     if (!this.resolved) {
+    //         this.resolveAndCreate();
+    //     }
 
-        return this.injector.get(token, notFoundValue);
-    }
+    //     return this.injector.get(token, notFoundValue);
+    // }
 
     useRouter() {
         this.use(this.router.callback());
@@ -95,7 +97,7 @@ module.exports = class Application extends KoaApplication {
         }
 
         middleware.forEach((value, index) => {
-            this.register({ provide: index, useFactory: value, deps: ['app'] });
+            this.container.register({ provide: index, useFactory: value, deps: ['app'] });
         });
     }
 

@@ -11,6 +11,7 @@ module.exports = class Controller {
      */
     setContext(ctx) {
         this.ctx = ctx;
+        this.app = ctx.app;
         return this;
     }
 }
