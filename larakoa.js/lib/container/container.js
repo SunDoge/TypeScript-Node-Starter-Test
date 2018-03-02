@@ -5,28 +5,37 @@ class Container {
     constructor() {
         // Should be resolved providers.
         this.providers = [];
-        this.hasResolvedAndCreated = false;
+        this.hasUpdated = true;
     }
 
-    register(providers) {
-        if (providers instanceof Array) {
-            this.providers = this.providers.concat(ReflectiveInjector.resolve(providers));
-        } else {
-            this.providers.push(providers)
+    get injector() {
+        if (this.hasUpdated) {
+            this.resolveAndCreate();
         }
 
+        return this._injector;
+    }
+
+    set injector(val) {
+        this._injector = val;
+        this.hasUpdated = false;
+    }
+
+    register(provider) {
+        if (provider instanceof Array) {
+            this.providers = this.providers.concat(provider);
+        } else {
+            this.providers.push(provider);
+        }
+        this.hasUpdated = true;
     }
 
     get(token, notFoundValue) {
-        if (!this.hasResolvedAndCreated) {
-            this.resolveAndCreate();
-        }
         return this.injector.get(token, notFoundValue);
     }
 
     resolveAndCreate() {
-        this.injector = ReflectiveInjector.fromResolvedProviders(this.providers);
-        this.hasResolvedAndCreated = true;
+        this.injector = ReflectiveInjector.resolveAndCreate(this.providers);
     }
 
     make(provider) {

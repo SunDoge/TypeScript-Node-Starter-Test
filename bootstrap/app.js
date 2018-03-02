@@ -93,6 +93,6 @@ app.router.group({ namespace: 'app/http/controllers' }, (router) => {
 
 app.useRouter();
 
-// console.log(app.config)
+// console.log(app.container.providers);
 
 module.exports = app;

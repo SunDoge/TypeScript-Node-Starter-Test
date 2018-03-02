@@ -97,7 +97,7 @@ module.exports = class Application extends KoaApplication {
         }
 
         middleware.forEach((value, index) => {
-            this.container.register({ provide: index, useFactory: value, deps: ['app'] });
+            this.container.set({ provide: index, useFactory: value, deps: ['app'] });
         });
     }
 

@@ -278,14 +278,14 @@ module.exports = class Router {
             // this.app.controllers.set(callable[0], new controller);
             container.register({ provide: callable[0], useClass: Controller });
 
-            // console.log(this.app.controllers);
+            // console.log(container.injector.get(callable[0]));
 
             middleware.push(async ctx => {
                 // await (ctx.app as Application).make(className).setContext(ctx)[methodName];
                 // console.log(methodName)
                 // console.log(((ctx.app as Application).controllers.get(callable[0])!.setContext(ctx) as any)[methodName])
                 // await ctx.app.controllers.get(callable[0]).setContext(ctx)[methodName]();
-                await ctx.app.container.get(callable[0]).setContext(ctx)[methodName]();
+                await container.get(callable[0]).setContext(ctx)[methodName]();
             });
 
         } else if (route.action.fn) {
