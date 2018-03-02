@@ -3,9 +3,9 @@ const _ = require('lodash');
 exports.isAuthenticated = async (ctx, next) => {
     if (ctx.isAuthenticated()) {
         await next();
+    } else {
+        ctx.redirect('/login');
     }
-
-    ctx.redirect('/login');
 }
 
 exports.isAuthorized = async (ctx, next) => {

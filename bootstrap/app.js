@@ -9,16 +9,25 @@ const flash = require('../app/http/middleware/koa-flash');
 const error = require('koa-error');
 const dotenv = require('dotenv');
 const mongoose = require('mongoose');
+const validator = require('koa2-validator');
+// const mongoStore = require('koa-session-mongo');
+const bluebird = require('bluebird');
+
+// const MongoStore = mongo(session);
 
 dotenv.config({ path: ".env.example" });
 
 const app = new Application();
 
-mongoose.connect(process.env.MONGODB_URI || process.env.MONGOLAB_URI);
+const mongoUrl = process.env.MONGOLAB_URI;
 
-mongoose.connection.on("error", () => {
-    console.log("MongoDB connection error. Please make sure MongoDB is running.");
-    process.exit();
+mongoose.Promise = bluebird;
+
+mongoose.connect(mongoUrl, {}).then(
+    () => { /** ready to use. The `mongoose.connect()` promise resolves to undefined. */ },
+).catch(err => {
+    console.log("MongoDB connection error. Please make sure MongoDB is running. " + err);
+    // process.exit();
 });
 
 // app.register([
@@ -62,7 +71,12 @@ app.keys = ['secret'];
 app.useMiddleware([
     (app) => { return serve(path.join(app.baseDir, 'public')); },
     (app) => { return bodyParser(); },
-    (app) => { return session({}, app); },
+    (app) => { return validator(); },
+    (app) => {
+        return session({
+
+        }, app);
+    },
     (app) => { return views(path.join(app.baseDir, 'views'), app.config.view); },
     (app) => { return flash(); },
     (app) => {

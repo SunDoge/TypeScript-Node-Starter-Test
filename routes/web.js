@@ -1,4 +1,5 @@
 const Router = require('../larakoa.js/lib/routing/router');
+const passportConfig = require('../app/http/middleware/passport');
 
 /**
  * 
@@ -24,5 +25,13 @@ module.exports = (router) => {
     router.get('/contact', 'contact@getContact');
     router.post('/contact', 'contact@postContact');
 
-    router.get('/account', 'user@getAccount');
+    // router.get('/account', 'user@getAccount');
+    // router.post('/account/profile', {middleware: [passportConfig.isAuthenticated], uses: 'user@postUpdateProfile'});
+    router.group({prefix: '/account', middleware: [passportConfig.isAuthenticated]}, () => {
+        router.get('/', 'user@getAccount');
+        router.post('/profile', 'user@postUpdateProfile');
+        router.post('/password', 'user@postUpdatePassword');
+        router.post('/delete', 'user@postDeleteAccount');
+        router.get('/unlink/:provider', 'user@getOauthUnlink')
+    })
 }
