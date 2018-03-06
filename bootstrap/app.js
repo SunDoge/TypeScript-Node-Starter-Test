@@ -12,6 +12,10 @@ const mongoose = require('mongoose');
 const validator = require('koa2-validator');
 // const mongoStore = require('koa-session-mongo');
 const bluebird = require('bluebird');
+const lusca = require('koa-lusca');
+const compress = require('koa-compress');
+const logger = require('koa-logger');
+const convert = require('koa-convert');
 
 // const MongoStore = mongo(session);
 
@@ -94,8 +98,12 @@ app.useMiddleware([
 // app.use(app.make('flash'));
 // app.use(app.make('error'));
 
+app.use(compress());
+app.use(logger());
 app.use(passport.initialize());
 app.use(passport.session());
+app.use(convert(lusca.xframe({ value: 'SAMEORIGIN' })));
+app.use(convert(lusca.xssProtection()));
 
 app.router.group({ namespace: 'app/http/controllers' }, (router) => {
     require('../routes/web')(router)
